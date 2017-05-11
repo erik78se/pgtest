@@ -1,0 +1,11 @@
+name: pgtest
+summary: Test pgsql
+maintainer: Erik Lönroth <Erik.Lönroth@snowflake.lan>
+description: |
+  Yeop
+tags:
+  - misc
+subordinate: false
+"requires":
+  "db":
+      "interface": "pgsql"

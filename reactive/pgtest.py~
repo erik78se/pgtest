@@ -1,0 +1,18 @@
+from charmhelpers.core import hookenv
+from charms.reactive import when, when_not, set_state, hook
+from charmhelpers.core.hookenv import (
+    log, config, relation_set, relation_get,
+    local_unit, related_units, remote_unit)
+
+@when('db.connected')
+def request_db(pgsql):
+    log("----------- db.connected ----------", "INFO")
+    
+@when('config.changed')
+def check_admin_pass():
+    log("----------- config.cnaged ----------", "INFO")
+
+@when('db.master.available', 'admin-pass')
+def render_config(pgsql):
+    log("----------- db.master.available ----------", "INFO")
+
