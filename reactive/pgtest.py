@@ -26,10 +26,17 @@ def waiting_for_db():
 @when_not('pgtest.started')
 def request_db(pgsql):
     log("----------- pgtest.request_db ----------", "INFO")
+    status_set('waiting', 'Waiting for DB to become available.')
     pgsql.set_database('mydb')
+
+
+@when('db.master.available')
+def start(pgsql):
+    status_set('maintenance', 'Starting...')
     conn_str = pgsql.master
     log("Got connection string {}".format(conn_str))
     # Setup your application to use the connection string (See documentation of interface)
     sleep(5)
     # Done with configuring and starting your service!
     set_state('pgtest.started')
+    status_set('active', 'Ready.')
