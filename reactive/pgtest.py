@@ -3,118 +3,33 @@ from charms.reactive import when, when_not, set_state, remove_state, hook
 from charmhelpers.core.hookenv import (
     log, config, relation_set, relation_get,
     local_unit, related_units, remote_unit, status_set)
-    
-@hook('install')
-def install_handler():
+from time import sleep
 
-    # Set the user defined "installing" state when this hook event occurs.
-    log("----------- install (hook) ----------", "INFO")
-    set_state('pgtest.installing')
-
-@hook('start')
-def start_handler():
-
-    # Set the user defined "starting" state when this hook event occurs.
-    log("----------- start (hook) ----------", "INFO")
-    set_state('pgtest.starting')
-
-
-@hook('stop')
-def stop_handler():
-
-    # Set the user defined "stopping" state when this hook event occurs.
-    log("----------- stop (hook) ----------", "INFO")
-    set_state('pgtest.stopping')
-    
-
-@hook('config-changed')
-def config_changed_handler():
-    log("----------- config-changed (hook) ----------", "INFO")
-    pass
-
-
-@hook('update-status')
-def update_status_handler():
-
-    # We could set the user defined "update-status" state and do this just like
-    # the start, install, stop handlers. But we leave this up to a reader to complete.
-    log("----------- update-status (hook) ----------", "INFO")
-    pass
-
-
-@hook('leader-elected')
-def leader_elected_handler():
-    
-    # We could set the user defined "leader-elected" state and do this just like
-    # the start, install, stop handlers. But we leave this up to a reader to co
-    log("----------- leader-elected (hook) ----------", "INFO")
-    pass
-
-
-
-##################################################
-@when('db.connected')
-def request_db(pgsql):
-    log("----------- db.connected ----------", "INFO")
-    
-@when('config.changed')
-def config_changed_reactive():
-    log("----------- config.changed (state) ----------", "INFO")
-
-
-@when('db.master.available', 'admin-pass')
-def render_config(pgsql):
-    log("----------- db.master.available ----------", "INFO")
-
-##################################################
-
-@when('pgtest.installing')
-def install_handler():
-    log("----------- pgtest.installing (user state) ----------", "INFO")
-    
+@when_not('pgtest.installed')
+def install_pgtest():
+    log("----------- pgtest.install_pgtest ----------", "INFO")
     status_set('maintenance', 'Installing...')
-    
-    # Handle the startup of the application
-    
-    status_set('active', 'I am installing.')
-    
-    # Remove the state "installing" since we are done.
-    
-    remove_state('pgtest.installing')
-    
+    # Do what needs to be done to bring your software in adding a sleep here
+    sleep(5)
+    # Done with installing!
+    set_state('pgtest.installed')
 
-@when('pgtest.starting')
-def start_handler():
-    log("----------- pgtest.starting (user state) ----------", "INFO")
-    
-    status_set('maintenance', 'Starting...')
 
-    # Handle the start of the application
-    
-    cfg = config()
+@when('pgtest.installed')
+@when_not('db.connected')
+def waiting_for_db():
+    log("----------- pgtest.waiting_for_db ----------", "INFO")
+    status_set('blocked', 'Please add a relation to DB.')
 
-    # Get the value for the "message" key.
 
-    m = "DEGBUG"
-    
-    status_set('active', ("Started with message: %s" % m))
-
-    # Remove the "starting" state since we are done.
-
-    remove_state('pgtest.starting')
-
-    
-@when('pgtest.stopping')
-def stop_handler():
-    log("----------- pgtest.stopping (user state) ----------", "INFO")
-    
-    status_set('maintenance', 'Stopping...')
-
-    # Handle the stop sequence of the application
-    
-    status_set('active', 'I am stopping.')
-
-    # Remove the "stopping" state since we are done.
-        
-    remove_state('pgtest.stopping')
-
+@when('db.connected')
+@when_not('pgtest.started')
+def request_db(pgsql):
+    log("----------- pgtest.request_db ----------", "INFO")
+    pgsql.set_database('mydb')
+    conn_str = pgsql.master
+    log("Got connection string {}".format(conn_str))
+    # Setup your application to use the connection string (See documentation of interface)
+    sleep(5)
+    # Done with configuring and starting your service!
+    set_state('pgtest.started')

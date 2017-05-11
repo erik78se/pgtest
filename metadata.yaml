@@ -6,6 +6,7 @@ description: |
 tags:
   - misc
 subordinate: false
-"requires":
-  "db":
-      "interface": "pgsql"
+requires:
+  db:
+    interface: pgsql
+series: ['xenial']
