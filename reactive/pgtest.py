@@ -27,6 +27,7 @@ def waiting_for_db():
 def request_db(pgsql):
     log("----------- pgtest.request_db ----------", "INFO")
     status_set('waiting', 'Waiting for DB to become available.')
+    # TODO (The followign will work only once)!!
     pgsql.set_database('mydb')
 
 
